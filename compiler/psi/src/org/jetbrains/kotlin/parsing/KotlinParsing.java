@@ -423,6 +423,10 @@ public class KotlinParsing extends AbstractKotlinParsing {
         }
         PsiBuilder.Marker decl = mark();
 
+        if (at(CONTEXT_KEYWORD)) {
+            parseContextReceiver();
+        }
+
         ModifierDetector detector = new ModifierDetector();
         parseModifierList(detector, DEFAULT, TokenSet.EMPTY);
 
@@ -610,6 +614,18 @@ public class KotlinParsing extends AbstractKotlinParsing {
 
         marker.rollbackTo();
         return false;
+    }
+
+    /*
+     * contextReceiver
+     *   : "context" "(" parameter{","}? ")"
+     */
+    private void parseContextReceiver() {
+        assert _at(CONTEXT_KEYWORD);
+        PsiBuilder.Marker contextReceiver = mark();
+        advance();
+        parseValueParameterList(true, /* typeRequired  = */ true, TokenSet.EMPTY);
+        contextReceiver.done(CONTEXT_RECEIVER);
     }
 
     /*
@@ -1177,6 +1193,10 @@ public class KotlinParsing extends AbstractKotlinParsing {
             return;
         }
         PsiBuilder.Marker decl = mark();
+
+        if (at(CONTEXT_KEYWORD)) {
+            parseContextReceiver();
+        }
 
         ModifierDetector detector = new ModifierDetector();
         parseModifierList(detector, DEFAULT, TokenSet.EMPTY);
